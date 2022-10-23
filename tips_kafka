@@ -1,0 +1,114 @@
+Tips Apache kafka - Formação KAFKA Alura
+
+instalação
+    https://kafka.apache.org/downloads -> Scala 2.13  - kafka_2.13-3.3.1.tgz (asc, sha512)
+
+download apache zookeeper
+    Rodar o zookeeper
+    bin/zookeeper-server-start.sh config/zookeeper.properties
+
+rodar o kafka  
+    bin/kafka-server-start.sh config/server.properties
+
+
+=================================================================================
+Comandos basicos KAFKA
+=================================================================================
+
+Ver opções do comando
+    bin/kafka-topics.sh
+
+Criar topico
+    bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic (nome_do_topico)
+    
+Listar TOPICS
+    bin/kafka-topics.sh --list --bootstrap-server localhost:9092
+    
+Listar TOPICS +infos
+    bin/kafka-topics.sh --bootstrap-server localhost:9092 --describe
+
+Enviar Mensagem TOPIC
+    bin/kafka-console-producer.sh --broker-list localhost:9092 --topic (nome_do_topico)
+
+Ler Mensagem TOPIC - começa a consumir a partir desse comando
+    bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic (nome_do_topico)
+
+Ler Mensagem TOPIC - começa a consumir a partir da primeira mensagem que esta no topico
+    bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic (nome_do_topico) --from-beginning
+
+
+=================================================================================
+Comandos EX KAFKA dentro do DOCKER
+=================================================================================
+
+Subir projeto no docker
+docker-compose up -d
+
+Criando topic
+docker exec broker kafka-topics --bootstrap-server broker:9092 --create --topic quickstart
+
+Postar Topic
+docker exec --interactive --tty broker kafka-console-producer --bootstrap-server broker:9092 --topic quickstart
+
+Ler Topic, desde sua criação
+docker exec --interactive --tty broker kafka-console-consumer --bootstrap-server broker:9092 --topic quickstart --from-beginning
+
+Listar TOPICS
+docker exec broker kafka-topics --bootstrap-server broker:9092 --list 
+
+=================================================================================
+Criando Projeto
+=================================================================================
+
+Projeto basic JAVA
+Adicionar essas bibliotecas
+
+Biblioteca do KAFKA
+<dependency>
+    <groupId>org.apache.kafka</groupId>
+    <artifactId>kafka-clients</artifactId>
+    <version>2.3.1</version>
+</dependency>
+
+Biblioteca de LOG
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-simple</artifactId>
+    <version>1.7.29</version>
+</dependency>
+
+
+Produzir Mensagem - criando um producer
+    var producer = new KafkaProducer<String, String>(properties())
+
+Criando propriedades para alimentar o producer
+    var properties = new properties();
+
+local onde ta rolando o kafka
+    properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
+
+serealizar os dados, aqui no caso string pra byte
+    properties.setProperty(ProducerConfig.KEY_SEREALIZER_CLASS_CONFIG, StringSerealizer.class.getName());
+
+serealizar os dados da mensagem, aqui no caso string pra byte
+    properties.setProperty(ProducerConfig.VALUE_SEREALIZER_CLASS_CONFIG, StringSerealizer.class.getName());
+
+criar um record
+    var value = "a mensagem que deseja mandar";
+    var record = new ProducerRecord<String, String>("NOME_DO_TOPICO_Q_ENVIARA_A_MENSAGEM", value, value);
+    var record = new ProducerRecord<String, String>("NOME_DO_TOPICO_Q_ENVIARA_A_MENSAGEM", chave, valor);
+    
+    var record = new ProducerRecord<>("NOME_DO_TOPICO_Q_ENVIARA_A_MENSAGEM", value, value);
+    var record = new ProducerRecord<>("NOME_DO_TOPICO_Q_ENVIARA_A_MENSAGEM", chave, valor);
+
+enviar a mensagem
+    producer.send(record); -> mensagem vai assyncrona
+    producer.send(record).get(); -> mensagem vai syncrona
+    
+    producer.send(record, (data, ex) -> {
+        if(ex != null){
+            ex.printStachTrace();
+            return
+        }
+        System.out.println("Sucesso enviando " + data.topic() + ":::partition" + data.partition() + "/ offset" + data.offset() + "/ timestemp" + data.timestamp());
+    }).get();
