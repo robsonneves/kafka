@@ -78,6 +78,8 @@ Biblioteca de LOG
 </dependency>
 
 
+# Criar Producer
+
 Produzir Mensagem - criando um producer
     var producer = new KafkaProducer<String, String>(properties())
 
@@ -112,3 +114,125 @@ enviar a mensagem
         }
         System.out.println("Sucesso enviando " + data.topic() + ":::partition" + data.partition() + "/ offset" + data.offset() + "/ timestemp" + data.timestamp());
     }).get();
+
+
+# Criar Consumer
+
+Criar Propriedades pra ler lista
+
+var properties = new Properties();
+properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
+properties.setProperty(COnsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserealizer.class.get());
+properties.setProperty(COnsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserealizer.class.get());
+properties.setProperty(COnsumerConfig.GROUP_ID_CONFIG, FraudDetectorService.class.get());
+return properties;
+
+Consumer
+    var consumer = new KafkaConsumer<String, String>(properties());
+    consumer.subscribe(Collections.singletonList("nome_do_topico"));
+
+    while(true){
+        var records = consumer.poll(Duration.ofMillis(100)); 
+        if(records.isEmpty()){
+            System.out.println("Não encontrei mensagens")
+            //return;
+            continue;
+        }
+        for(var recod : records){
+            System.out.println("Processing mensagem")
+            System.out.println(record.key())
+            System.out.println(record.value())
+            System.out.println(record.partition())
+            System.out.println(record.offset())
+        }
+    }
+
+
+# Varios Producers e Consumers 
+# Criando mais um producer
+var producer = new KafkaProducer<String, String>(properties());
+var key = UUID.randomUUID().toString();
+var value = key + "123, 1234, 12345";
+var record = new ProducerRecord<>("Nome Topico", key, value);
+Callback callback = (data, ex) ->  {
+    if(ex != null){
+        ex.printStackTrace();
+        return;
+    }
+    System.out.println("Mensagem enviada com sucesso");
+}
+var email = "Mensagem";
+var emailRecord = new ProducerRecord<>("Nome topico", key, email);
+producer.send(record, callback).get();
+producer.send(emailRecord, callback).get();
+
+# Criando mais um consumer
+var properties = new Properties();
+properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
+properties.setProperty(COnsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserealizer.class.get());
+properties.setProperty(COnsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserealizer.class.get());
+properties.setProperty(COnsumerConfig.GROUP_ID_CONFIG, FraudDetectorService.class.get());
+return properties;
+var consumer = new KafkaConsumer<String, String>(properties());
+consumer.subscribe(Collections.singletonList("nome_do_topico"));
+
+while(true){
+    var records = consumer.poll(Duration.ofMillis(100)); 
+    if(records.isEmpty()){
+        System.out.println("Não encontrei mensagens")
+        //return;
+        continue;
+    }
+    for(var recod : records){
+        System.out.println("Processing mensagem")
+        System.out.println(record.key())
+        System.out.println(record.value())
+        System.out.println(record.partition())
+        System.out.println(record.offset())
+        try{
+            Thread.sleep(5000);
+        } catch(InterruptedException e){
+            e.printStackTrace();
+        }
+        System.out.println("Mensagem processada");
+    }
+ }
+
+# Criar Consumer Generico pra ler mais de um topico
+var consumer = new KafkaConsumer<String, String>(properties());
+consumer.subscribe(Pattern.compile("NOME_.*")); ---- aqui aceita uma expressão regular
+
+while(true){
+    var records = consumer.poll(Duration.ofMillis(100)); 
+    if(records.isEmpty()){
+        System.out.println("Não encontrei mensagens")
+        //return;
+        continue;
+    }
+    for(var recod : records){
+        System.out.println("Processing mensagem")
+        System.out.println("LOG " + record.topic())
+        System.out.println(record.key())
+        System.out.println(record.value())
+        System.out.println(record.partition())
+        System.out.println(record.offset())
+    }
+ }
+
+# Adicionar mais de um mesmo consumidor
+
+na configuração almentar o partition
+depois tem que reestart no topico
+bin/kafka-topics.sh --alter --zookeeper localhost:2181 --topic nome_do_topico --partitions 3
+bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe
+bin/kafka-consumer-groups.sh --all-groups --bootstrap-server localhost:9092 --describe
+
+var properties = new Properties();
+properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
+properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserealizer.class.get());
+properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserealizer.class.get());
+properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, FraudDetectorService.class.get());
+properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1");  ---------------- quantidade de mensagens lidas
+return properties;
+
+
