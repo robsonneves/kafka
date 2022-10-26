@@ -78,7 +78,9 @@ Biblioteca de LOG
 </dependency>
 
 
+=================================================================================
 # Criar Producer
+=================================================================================
 
 Produzir Mensagem - criando um producer
     var producer = new KafkaProducer<String, String>(properties())
@@ -116,7 +118,9 @@ enviar a mensagem
     }).get();
 
 
+=================================================================================
 # Criar Consumer
+=================================================================================
 
 Criar Propriedades pra ler lista
 
@@ -148,8 +152,11 @@ Consumer
     }
 
 
+=================================================================================
 # Varios Producers e Consumers 
 # Criando mais um producer
+=================================================================================
+
 var producer = new KafkaProducer<String, String>(properties());
 var key = UUID.randomUUID().toString();
 var value = key + "123, 1234, 12345";
@@ -166,7 +173,11 @@ var emailRecord = new ProducerRecord<>("Nome topico", key, email);
 producer.send(record, callback).get();
 producer.send(emailRecord, callback).get();
 
+
+=================================================================================
 # Criando mais um consumer
+=================================================================================
+
 var properties = new Properties();
 properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
 properties.setProperty(COnsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserealizer.class.get());
@@ -198,7 +209,11 @@ while(true){
     }
  }
 
+
+=================================================================================
 # Criar Consumer Generico pra ler mais de um topico
+=================================================================================
+
 var consumer = new KafkaConsumer<String, String>(properties());
 consumer.subscribe(Pattern.compile("NOME_.*")); ---- aqui aceita uma expressão regular
 
@@ -219,7 +234,10 @@ while(true){
     }
  }
 
+
+=================================================================================
 # Adicionar mais de um mesmo consumidor
+=================================================================================
 
 na configuração almentar o partition
 depois tem que reestart no topico
@@ -234,5 +252,33 @@ properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDes
 properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, FraudDetectorService.class.get());
 properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1");  ---------------- quantidade de mensagens lidas
 return properties;
+
+
+=================================================================================
+Configurar projeto
+=================================================================================
+
+pra manter as configs trocar os diretorios
+    config/server.properties
+    zookeeper/zookeeper.properties
+
+
+
+
+
+
+
+
+
+
+=================================================================================
+Curso - 02
+=================================================================================
+
+
+
+
+
+
 
 
